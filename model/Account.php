@@ -11,7 +11,7 @@ class Account {
     private $name;
 
     //tworzy nowy obiekt klasy account na podstawie danych podanych jako argumenty
-    public function __construct($accountNo, $amount, $name) {
+    public function __construct(int $accountNo, int $amount, string $name) {
         $this->accountNo = $accountNo;
         $this->amount = $amount;
         $this->name = $name;
