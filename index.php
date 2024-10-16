@@ -20,6 +20,12 @@ use BankAPI\Account;
 Route::add('/', function() {
   echo 'Hello world!';
 });
+//ścieżka używana przez aplikację okienkową do logowania
+//aplikacja wysyła  nam login i hasło zakodowane JSON metodą post
+//API odpowiada do aplikacji wysyłając token w formacie JSON
+Route::add('/login', function() {
+  
+}, 'post');
 
 //ścieżka wyświetla dane dotyczące rachunku bankowego po jego numerze
 //jeżeli ktoś zapyta API o /account/1234 to zwróci dane rachunku o numerze 1234
