@@ -4,6 +4,11 @@
 require_once('Route.php');
 //model odpowiadający za tabelę account w bazie danych - umożliwia operacje na rachunkach
 require_once('model/Account.php');
+//model użytkownika
+require_once('model/User.php');
+//model tokena
+require_once('model/Token.php');
+
 //połączenie do bazy danych
 //TODO: wyodrębnić zmienne dotyczące środowiska do pliku konfiguracyjnego
 $db = new mysqli('localhost', 'root', '', 'bankAPI');
@@ -24,7 +29,7 @@ Route::add('/', function() {
 //aplikacja wysyła  nam login i hasło zakodowane JSON metodą post
 //API odpowiada do aplikacji wysyłając token w formacie JSON
 Route::add('/login', function() {
-  
+  return var_dump($_POST);
 }, 'post');
 
 //ścieżka wyświetla dane dotyczące rachunku bankowego po jego numerze
