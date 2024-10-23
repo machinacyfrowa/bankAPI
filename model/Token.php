@@ -5,7 +5,7 @@ class Token {
         //o adres IP, id użytkownika i czas
         $hash = hash('sha256', $ip . $userId . time());
         //przygotuj zapytanie
-        $sql = "INSERT INTO token (token, ip, userId) VALUES (?, ?, ?)";
+        $sql = "INSERT INTO token (token, ip, user_id) VALUES (?, ?, ?)";
         $query = $db->prepare($sql);
         //podmień znaki zapytania na zmienne
         $query->bind_param('ssi', $hash, $ip, $userId);

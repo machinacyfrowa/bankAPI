@@ -28,8 +28,31 @@ Route::add('/', function() {
 //ścieżka używana przez aplikację okienkową do logowania
 //aplikacja wysyła  nam login i hasło zakodowane JSON metodą post
 //API odpowiada do aplikacji wysyłając token w formacie JSON
-Route::add('/login', function() {
-  return var_dump($_POST);
+Route::add('/login', function() use($db) {
+  //php nie potrafi odebrac JSONa w post tak jak formularza
+  //więc musimy odczytać
+  //dane z php input - tam znajdziemy JSONa
+  $data = file_get_contents('php://input');
+  $data = json_decode($data, true);
+  $ip = $_SERVER['REMOTE_ADDR'];
+  try {
+    //spróbuj zalogować użytkownika
+    $id = User::login($data['login'], $data['password'], $db);
+    //wygeneruj nowy token dla tego użytkownika i tego IP
+    $token = Token::new($ip, $id, $db);
+    //ustaw nagłówek odpowiedzi na JSON żeby przeglądarka 
+    //wiedziała jak interpretować dane
+    header('Content-Type: application/json');
+    //zwróć token w formacie JSON
+    echo json_encode(['token' => $token]);
+  } catch (Exception $e) {
+    //jeżeli nie udało się zalogować to zwróć błąd
+    header('HTTP/1.1 401 Unauthorized');
+    //czy naprawdę musimy zwracać jakąś treść?
+    echo json_encode(['error' => 'Invalid login or password']);
+    return;
+  }
+  
 }, 'post');
 
 //ścieżka wyświetla dane dotyczące rachunku bankowego po jego numerze
