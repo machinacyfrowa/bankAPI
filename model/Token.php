@@ -38,5 +38,26 @@ class Token {
             return true;
         }
     }
+    //funkcja zwracająca id użytkownika na podstawie tokenu
+    static function getUserId(string $token, mysqli $db) : int {
+        //szukamy id użytkownika na podstawie tokenu
+        //szukamy najnowszego istniejacego tokenu
+        //szukamy maksymalnie jednego
+        $sql = "SELECT user_id FROM token WHERE token = ? 
+                    ORDER BY id DESC LIMIT 1";
+        $query = $db->prepare($sql);
+        $query->bind_param('s', $token);
+        $query->execute();
+        $result = $query->get_result();
+        //jeśli nie ma tokenu to wyrzuć wyjątek
+        if($result->num_rows == 0) {
+            throw new Exception('Invalid token');
+        } else {
+            //zwróć wiersz z tabeli jako tablicę asocjacyjną
+            $row = $result->fetch_assoc();
+            //wyciągnij i zwróć id użytkownika
+            return $row['user_id'];
+        }
+    }
 }
 ?>
