@@ -95,6 +95,25 @@ Route::add('/account/([0-9]*)', function($accountNo) use($db) {
     return json_encode($account->getArray());
 });
 
+//endpoint do wykonywania przelewów
+Route::add('/transfer/new', function () use($db) {
+    //zakładamy, że aplikacja przekazała nam token w postaci danych JSON
+    //przeczytaj surowe dane wejściowe z PHP
+    $data = file_get_contents('php://input');
+    //przekształć JSON wejściowe w tablicę asocjacyjną
+    $dataArray = json_decode($data, true);
+    //zakładam, ze w paczce danych jest token pod nazwą "token"
+    $token = $dataArray['token'];
+    //sprawdz poprawność tokena
+    if(!Token::check($token, $_SERVER['REMOTE_ADDR'], $db)) {
+        //jeżeli token jest niepoprawny to zwróć błąd
+        header('HTTP/1.1 401 Unauthorized');
+        //opcjonalnie
+        return json_encode(['error' => 'Invalid token']);
+    }
+    //TODO: sprawdz dane i wykonaj przelew
+}, 'post');
+
 //ta linijka musi być na końcu
 //musi tu być nazwa folderu w którym "mieszka" API
 Route::run('/bankAPI');
