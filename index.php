@@ -8,6 +8,7 @@ require_once('model/Account.php');
 require_once('model/User.php');
 //model tokena
 require_once('model/Token.php');
+require_once('model/Transfer.php');
 
 //połączenie do bazy danych
 //TODO: wyodrębnić zmienne dotyczące środowiska do pliku konfiguracyjnego
@@ -96,7 +97,7 @@ Route::add('/account/([0-9]*)', function($accountNo) use($db) {
 });
 
 //endpoint do wykonywania przelewów
-Route::add('/transfer/new', function () use($db) {
+Route::add('/transfer/new', function() use($db) {
     //zakładamy, że aplikacja przekazała nam token w postaci danych JSON
     //przeczytaj surowe dane wejściowe z PHP
     $data = file_get_contents('php://input');
@@ -112,6 +113,13 @@ Route::add('/transfer/new', function () use($db) {
         return json_encode(['error' => 'Invalid token']);
     }
     //TODO: sprawdz dane i wykonaj przelew
+    $userId = Token::getUserId($token, $db);
+    $source = Account::getAccountNo($userId, $db);
+    $target = $dataArray['target'];
+    $amount = $dataArray['amount'];
+    Transfer::new($source, $target, $amount, $db);
+    header('Status: 200');
+    return json_encode(['status' => 'OK']);
 }, 'post');
 
 //ta linijka musi być na końcu
