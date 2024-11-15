@@ -1,4 +1,13 @@
 <?php
+namespace BankAPI;
+use mysqli;
+use Exception;
+/**
+ * Class Token
+ * 
+ * This class provides functionalities to perform specific operations regarding
+ * tokens in our virtual bank.
+ */
 class Token {
     static function new(string $ip, int $userId, mysqli $db) : string {
         //wygeneruj unikatowy hash w oparciu

@@ -19,6 +19,9 @@ $db->set_charset('utf8');
 //użyj przestrzeni nazw od klasy routingu i od naszej klasy od rachunków
 use Steampixel\Route;
 use BankAPI\Account;
+use BankAPI\User;
+use BankAPI\Transfer;
+use BankAPI\Token;
 
 //jeśli ktoś zapyta API bez żadnego parametru
 //zwróć hello world
@@ -29,6 +32,11 @@ Route::add('/', function() {
 //ścieżka używana przez aplikację okienkową do logowania
 //aplikacja wysyła  nam login i hasło zakodowane JSON metodą post
 //API odpowiada do aplikacji wysyłając token w formacie JSON
+/**
+ * Endpoint służący do zalogowania użytkownika
+ * Przyjmuje od aplikacji dane w formacie JSON
+ * { login = "login_z_formatki", password = "hasło_z_formatki" }
+ */
 Route::add('/login', function() use($db) {
   //php nie potrafi odebrac JSONa w post tak jak formularza
   //więc musimy odczytać
@@ -112,11 +120,15 @@ Route::add('/transfer/new', function() use($db) {
         //opcjonalnie
         return json_encode(['error' => 'Invalid token']);
     }
-    //TODO: sprawdz dane i wykonaj przelew
+    //pobierz id użytkownika na podstawie tokena
     $userId = Token::getUserId($token, $db);
+    //pobierz numer rachunku użytkownika
     $source = Account::getAccountNo($userId, $db);
+    //pobierz numer rachunku docelowego i kwotę przelewu
+    //z zapytania skierowanego do API
     $target = $dataArray['target'];
     $amount = $dataArray['amount'];
+    //wykonujemy nowy przelew
     Transfer::new($source, $target, $amount, $db);
     header('Status: 200');
     return json_encode(['status' => 'OK']);

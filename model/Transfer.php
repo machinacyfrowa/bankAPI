@@ -1,4 +1,14 @@
 <?php
+namespace BankAPI;
+use mysqli;
+use Exception;
+use mysqli_sql_exception;
+/**
+ * Class Transfer
+ * 
+ * This class provides functionalities to perform specific operations regarding
+ * transfers in our virtual bank.
+ */
 class Transfer {
     public static function new(int $source, int $target, int $amount, mysqli $db) : void {
         //rozpocznij transakcje
