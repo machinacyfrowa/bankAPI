@@ -22,6 +22,7 @@ use BankAPI\Account;
 use BankAPI\User;
 use BankAPI\Transfer;
 use BankAPI\Token;
+use BankAPI\LoginRequest;
 
 //jeśli ktoś zapyta API bez żadnego parametru
 //zwróć hello world
@@ -42,11 +43,11 @@ Route::add('/login', function() use($db) {
   //więc musimy odczytać
   //dane z php input - tam znajdziemy JSONa
   $data = file_get_contents('php://input');
-  $data = json_decode($data, true);
+  $request = new LoginRequest($data);
   $ip = $_SERVER['REMOTE_ADDR'];
   try {
     //spróbuj zalogować użytkownika
-    $id = User::login($data['login'], $data['password'], $db);
+    $id = User::login($request->getLogin(), $request->getPassword(), $db);
     //wygeneruj nowy token dla tego użytkownika i tego IP
     $token = Token::new($ip, $id, $db);
     //ustaw nagłówek odpowiedzi na JSON żeby przeglądarka 
