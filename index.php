@@ -11,6 +11,7 @@ require_once('model/Token.php');
 require_once('model/Transfer.php');
 require_once('class/LoginRequest.php');
 require_once('class/LoginResponse.php');
+require_once('class/AccountDetailsRequest.php');
 
 //połączenie do bazy danych
 //TODO: wyodrębnić zmienne dotyczące środowiska do pliku konfiguracyjnego
@@ -26,6 +27,7 @@ use BankAPI\Transfer;
 use BankAPI\Token;
 use BankAPI\LoginRequest;
 use BankAPI\LoginResponse;
+use BankAPI\AccountDetailsRequest;
 
 
 //jeśli ktoś zapyta API bez żadnego parametru
@@ -66,22 +68,17 @@ Route::add('/login', function() use($db) {
 //metoda identyfikuje użytkownika na podstawie tokenu
 //sprawdza w bazie i zwraca dane pierwszego znalezionego rachunku
 Route::add('/account/details', function() use($db) {
-    //zakładamy, że aplikacja przekazała nam token w postaci danych JSON
-    //przeczytaj surowe dane wejściowe z PHP
-    $data = file_get_contents('php://input');
-    //przekształć JSON wejściowe w tablicę asocjacyjną
-    $dataArray = json_decode($data, true);
-    //zakładam, ze w paczce danych jest token pod nazwą "token"
-    $token = $dataArray['token'];
+    
+    $request = new AccountDetailsRequest();
     //sprawdz poprawność tokena
-    if(!Token::check($token, $_SERVER['REMOTE_ADDR'], $db)) {
+    if(!Token::check($request->getToken(), $_SERVER['REMOTE_ADDR'], $db)) {
         //jeżeli token jest niepoprawny to zwróć błąd
         header('HTTP/1.1 401 Unauthorized');
         //opcjonalnie
         return json_encode(['error' => 'Invalid token']);
     }
     //pobierz id użytkownika na podstawie tokena
-    $userId = Token::getUserId($token, $db);
+    $userId = Token::getUserId($request->getToken(), $db);
     //wyciągamy numer rachunku i zwracamy go jako json
     $accountNo = Account::getAccountNo($userId, $db);
     $account = Account::getAccount($accountNo, $db);
