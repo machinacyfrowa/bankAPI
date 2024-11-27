@@ -7,7 +7,8 @@ class LoginRequest {
     /**
      * Konstruktor pracuje na surowych danych otrzymanych z php://input
      */
-    public function __construct(string $data) {
+    public function __construct() {
+        $data = file_get_contents('php://input');
         $data = json_decode($data, true);
         $this->login = $data['login'];
         $this->password = $data['password'];

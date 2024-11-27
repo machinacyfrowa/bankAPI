@@ -9,6 +9,8 @@ require_once('model/User.php');
 //model tokena
 require_once('model/Token.php');
 require_once('model/Transfer.php');
+require_once('class/LoginRequest.php');
+require_once('class/LoginResponse.php');
 
 //połączenie do bazy danych
 //TODO: wyodrębnić zmienne dotyczące środowiska do pliku konfiguracyjnego
@@ -23,6 +25,8 @@ use BankAPI\User;
 use BankAPI\Transfer;
 use BankAPI\Token;
 use BankAPI\LoginRequest;
+use BankAPI\LoginResponse;
+
 
 //jeśli ktoś zapyta API bez żadnego parametru
 //zwróć hello world
@@ -39,27 +43,20 @@ Route::add('/', function() {
  * { login = "login_z_formatki", password = "hasło_z_formatki" }
  */
 Route::add('/login', function() use($db) {
-  //php nie potrafi odebrac JSONa w post tak jak formularza
-  //więc musimy odczytać
-  //dane z php input - tam znajdziemy JSONa
-  $data = file_get_contents('php://input');
-  $request = new LoginRequest($data);
-  $ip = $_SERVER['REMOTE_ADDR'];
+  //utwórz obiekt żądania    
+  $request = new LoginRequest();
   try {
     //spróbuj zalogować użytkownika
     $id = User::login($request->getLogin(), $request->getPassword(), $db);
     //wygeneruj nowy token dla tego użytkownika i tego IP
+    $ip = $_SERVER['REMOTE_ADDR'];
     $token = Token::new($ip, $id, $db);
-    //ustaw nagłówek odpowiedzi na JSON żeby przeglądarka 
-    //wiedziała jak interpretować dane
-    header('Content-Type: application/json');
-    //zwróć token w formacie JSON
-    echo json_encode(['token' => $token]);
+    //stwórz obiekt odpowiedzi
+    $response = new LoginResponse($token, "");
+    $response->send();
   } catch (Exception $e) {
-    //jeżeli nie udało się zalogować to zwróć błąd
-    header('HTTP/1.1 401 Unauthorized');
-    //czy naprawdę musimy zwracać jakąś treść?
-    echo json_encode(['error' => 'Invalid login or password']);
+    $response = new LoginResponse("", $e->getMessage());
+    $response->send();
     return;
   }
   
