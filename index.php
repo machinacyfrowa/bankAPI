@@ -12,6 +12,7 @@ require_once('model/Transfer.php');
 require_once('class/LoginRequest.php');
 require_once('class/LoginResponse.php');
 require_once('class/AccountDetailsRequest.php');
+require_once('class/AccountDetailsResponse.php');
 
 //połączenie do bazy danych
 //TODO: wyodrębnić zmienne dotyczące środowiska do pliku konfiguracyjnego
@@ -28,6 +29,7 @@ use BankAPI\Token;
 use BankAPI\LoginRequest;
 use BankAPI\LoginResponse;
 use BankAPI\AccountDetailsRequest;
+use BankAPI\AccountDetailsResponse;
 
 
 //jeśli ktoś zapyta API bez żadnego parametru
@@ -70,20 +72,21 @@ Route::add('/login', function() use($db) {
 Route::add('/account/details', function() use($db) {
     
     $request = new AccountDetailsRequest();
+    $response = new AccountDetailsResponse();
     //sprawdz poprawność tokena
     if(!Token::check($request->getToken(), $_SERVER['REMOTE_ADDR'], $db)) {
-        //jeżeli token jest niepoprawny to zwróć błąd
-        header('HTTP/1.1 401 Unauthorized');
-        //opcjonalnie
-        return json_encode(['error' => 'Invalid token']);
+        //jeżeli token jest niepoprawny to zapisz błąd w odpowiedzi
+        $response->setError('Invalid token');
     }
     //pobierz id użytkownika na podstawie tokena
     $userId = Token::getUserId($request->getToken(), $db);
     //wyciągamy numer rachunku i zwracamy go jako json
     $accountNo = Account::getAccountNo($userId, $db);
     $account = Account::getAccount($accountNo, $db);
-    header('Content-Type: application/json');
-    return json_encode($account->getArray());
+    //ładujemy dane o koncie do odpowiedzi
+    $response->setAccount($account->getArray());
+    //wysyłamy odpowiedź
+    $response->send();
 }, 'post');
 
 //ścieżka wyświetla dane dotyczące rachunku bankowego po jego numerze
