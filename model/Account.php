@@ -99,6 +99,9 @@ class Account {
         ];
         return $array;
     }
+    /**
+     * This method is used to check if account exists in the database.
+     */
     public static function ifExists(int $accountNo, mysqli $db) : bool {
         $sql = "SELECT * FROM account WHERE accountNo = ?";
         $query = $db->prepare($sql);
@@ -110,6 +113,15 @@ class Account {
         } else {
             return false;
         }
+    }
+    public static function ballance(int $accountNo, mysqli $db) : int {
+        $sql = "SELECT amount FROM account WHERE accountNo = ?";
+        $query = $db->prepare($sql);
+        $query->bind_param('i', $accountNo);
+        $query->execute();
+        $result = $query->get_result();
+        $account = $result->fetch_assoc();
+        return $account['amount'];
     }
 }
 ?>

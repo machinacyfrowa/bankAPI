@@ -131,7 +131,10 @@ Route::add('/transfer/new', function() use($db) {
     }
     $amount = $dataArray['amount'];
     //todo: sprawdź czy użytkownik ma wystarczająco dużo środków na koncie
-    
+    if(Account::ballance($source, $db) < $amount) {
+      header('HTTP/1.1 401 Unauthorized');
+      return json_encode(['error' => 'Not enough money']);
+    }
     //wykonujemy nowy przelew
     Transfer::new($source, $target, $amount, $db);
     header('Status: 200');
